@@ -39,6 +39,15 @@ class GraphPanel(val trace: TraceReader)
         }
     }
 
+    private def showFrame(g: Graphics2D) {
+        val frame = data.last.frame
+        val str = s"Frame: $frame"
+        val layout = new TextLayout(str, font, g.getFontRenderContext)
+        val x = size.width - layout.getBounds.getWidth - font.getSize
+        val y = layout.getBounds.getHeight * 1.5
+        layout.draw(g, x.toFloat, y.toFloat)
+    }
+
     private def drawXAxis(g: Graphics2D, label: String) {
         g.drawLine(left, size.height - bottom,
                    size.width, size.height - bottom)
@@ -53,15 +62,18 @@ class GraphPanel(val trace: TraceReader)
         val layout = new TextLayout(label, font, g.getFontRenderContext)
         val x = font.getSize
         val y = size.height / 2
-        g.translate(x, y)
-        g.rotate(-math.Pi / 2.0)
-        layout.draw(g, (-layout.getBounds.getWidth / 2.0).toFloat, 0)
+        val tg = g.create.asInstanceOf[Graphics2D]
+        tg.translate(x, y)
+        tg.rotate(-math.Pi / 2.0)
+        layout.draw(tg, (-layout.getBounds.getWidth / 2.0).toFloat, 0)
+        tg.dispose
     }
 
     private def drawAxes(g: Graphics2D, x: String, y: String) {
         g.setColor(hl)
         drawXAxis(g, x)
         drawYAxis(g, y)
+        showFrame(g)
     }
 
     private def showHistogram(g: Graphics2D) {

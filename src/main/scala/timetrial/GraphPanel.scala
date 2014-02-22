@@ -122,7 +122,7 @@ class GraphPanel(val trace: TraceReader)
             xpoints(i) = (i * xscale).toInt + left
             ypoints(i) = (values(i) * yscale).toInt
         }
-        xpoints(len) = size.width
+        xpoints(len) = xpoints(len - 1)
         ypoints(len) = size.height - bottom
         xpoints(len + 1) = left
         ypoints(len + 1) = size.height - bottom

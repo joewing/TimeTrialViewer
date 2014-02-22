@@ -71,6 +71,25 @@ class GraphPanel(val trace: TraceReader)
             return
         }
 
+        val minIndex = data.map(_.index).min
+        val maxIndex = data.map(_.index).max
+        val minValue = data.map(_.value).min
+        val maxValue = data.map(_.value).max
+
+        val indexRange = maxIndex - minIndex + 1
+        val barWidth = (size.width - left).toDouble / indexRange.toDouble
+        val valueRange = maxValue - minValue + 1
+        val scaley = (size.height - bottom).toDouble / valueRange.toDouble
+
+        g.setColor(fg)
+        for (d <- data) {
+            val x = left + (d.index - minIndex) * barWidth
+            val height = (d.value - minValue) * scaley
+            val y = (size.height - bottom) - height
+            g.fillRect(x.ceil.toInt, y.ceil.toInt,
+                       barWidth.ceil.toInt, height.ceil.toInt)
+        }
+
         drawAxes(g)
     }
 
@@ -84,8 +103,8 @@ class GraphPanel(val trace: TraceReader)
         val maxValue = values.max
         val minValue = values.min
         val diff = math.max(1, maxValue - minValue)
-        val yscale = (size.height - left).toDouble / diff.toDouble
-        val xscale = (size.width - bottom).toDouble / len.toDouble
+        val yscale = (size.height - bottom).toDouble / diff.toDouble
+        val xscale = (size.width - left).toDouble / len.toDouble
 
         val npoints = len + 2
         val xpoints = new Array[Int](npoints)

@@ -39,18 +39,17 @@ class GraphPanel(val trace: TraceReader)
         }
     }
 
-    private def drawXAxis(g: Graphics2D) {
+    private def drawXAxis(g: Graphics2D, label: String) {
         g.drawLine(left, size.height - bottom,
                    size.width, size.height - bottom)
-        val layout = new TextLayout("Frame", font, g.getFontRenderContext)
+        val layout = new TextLayout(label, font, g.getFontRenderContext)
         val x = size.width / 2 - layout.getBounds.getWidth / 2
         val y = size.height - font.getSize
         layout.draw(g, x.toFloat, y.toFloat)
     }
 
-    private def drawYAxis(g: Graphics2D) {
+    private def drawYAxis(g: Graphics2D, label: String) {
         g.drawLine(left, 0, left, size.height - bottom)
-        val label = tap.head.label
         val layout = new TextLayout(label, font, g.getFontRenderContext)
         val x = font.getSize
         val y = size.height / 2
@@ -59,10 +58,10 @@ class GraphPanel(val trace: TraceReader)
         layout.draw(g, (-layout.getBounds.getWidth / 2.0).toFloat, 0)
     }
 
-    private def drawAxes(g: Graphics2D) {
+    private def drawAxes(g: Graphics2D, x: String, y: String) {
         g.setColor(hl)
-        drawXAxis(g)
-        drawYAxis(g)
+        drawXAxis(g, x)
+        drawYAxis(g, y)
     }
 
     private def showHistogram(g: Graphics2D) {
@@ -71,26 +70,24 @@ class GraphPanel(val trace: TraceReader)
             return
         }
 
-        val minIndex = data.map(_.index).min
         val maxIndex = data.map(_.index).max
-        val minValue = data.map(_.value).min
         val maxValue = data.map(_.value).max
 
-        val indexRange = maxIndex - minIndex + 1
+        val indexRange = maxIndex + 1
         val barWidth = (size.width - left).toDouble / indexRange.toDouble
-        val valueRange = maxValue - minValue + 1
+        val valueRange = maxValue + 1
         val scaley = (size.height - bottom).toDouble / valueRange.toDouble
 
         g.setColor(fg)
         for (d <- data) {
-            val x = left + (d.index - minIndex) * barWidth
-            val height = (d.value - minValue) * scaley
+            val x = left + d.index * barWidth
+            val height = d.value * scaley
             val y = (size.height - bottom) - height
             g.fillRect(x.ceil.toInt, y.ceil.toInt,
                        barWidth.ceil.toInt, height.ceil.toInt)
         }
 
-        drawAxes(g)
+        drawAxes(g, tap.head.label, "n")
     }
 
     private def showTrace(g: Graphics2D) {
@@ -120,7 +117,7 @@ class GraphPanel(val trace: TraceReader)
         g.setColor(fg)
         g.fillPolygon(xpoints, ypoints, npoints)
 
-        drawAxes(g)
+        drawAxes(g, "Frame", tap.head.label)
     }
 
     def updateTrace = {

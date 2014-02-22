@@ -1,16 +1,19 @@
 package timetrial
 
+import java.awt.event.{ActionEvent, ActionListener}
 import java.io.File
-import javax.swing.JFrame
+import javax.swing.{JFrame, Timer}
 import scala.swing._
 
-object TimeTrialViewer {
+object TimeTrialViewer extends ActionListener {
 
-    def usage {
+    private var traceReader: TraceReader = null
+
+    private def usage {
         println("scala TimeTrialViewer [<datafile>]")
     }
 
-    def selectFile: File  = {
+    private def selectFile: File  = {
         val chooser = new FileChooser
         chooser.title = "TimeTrial Viewer"
         val result = chooser.showOpenDialog(null)
@@ -20,8 +23,12 @@ object TimeTrialViewer {
         }
     }
 
-    def run(f: File) {
-        val traceReader = new TraceReader(f)
+    def actionPerformed(e: ActionEvent) {
+        traceReader.process
+    }
+
+    private def run(f: File) {
+        traceReader = new TraceReader(f)
         val frame = new Frame
         val panel = new BorderPanel
         val selectionPanel = new FlowPanel
@@ -36,6 +43,8 @@ object TimeTrialViewer {
         frame.peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
         frame.title = "TimeTrial Viewer"
         frame.pack
+        val timer = new Timer(1000, this)
+        timer.start
         frame.visible = true
     }
 

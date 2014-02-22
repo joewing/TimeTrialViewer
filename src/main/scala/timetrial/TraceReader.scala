@@ -1,12 +1,15 @@
 package timetrial
 
 import java.io.{File, FileReader, LineNumberReader}
+import java.lang.System
 
-class TraceReader(val file: File) {
+class TraceReader(val file: File, val interval: Int = 1000) {
 
     private var traceListeners = Seq[TraceListener]()
+    private var records = Seq[Record]()
+    private var lastUpdate: Long = 0
 
-    private def lines: Stream[String] = {
+    private def readLines: Stream[String] = {
         val reader = new LineNumberReader(new FileReader(file))
         def nextLine: Stream[String] = {
             val str = reader.readLine
@@ -19,8 +22,8 @@ class TraceReader(val file: File) {
         nextLine
     }
 
-    private def records: Stream[Record] = {
-        lines.map { line =>
+    private def readRecords {
+        val recordStream = readLines.map { line =>
             val fields = line.split(",")
             if (fields.length == 5 && fields(0) == "s") {
                 val id = fields(1).toInt
@@ -38,16 +41,33 @@ class TraceReader(val file: File) {
                 InvalidRecord(line)
             }
         }
+        records = recordStream.toSeq
     }
 
-    def taps: Stream[StartRecord] = {
+    def taps: Seq[StartRecord] = {
         records.takeWhile(!_.isInstanceOf[DataRecord]).collect {
             case s: StartRecord => s
         }
     }
 
-    def values(id: Int): Stream[DataRecord] = {
+    def values(id: Int): Seq[DataRecord] = {
         records.collect { case d: DataRecord if d.id == id => d }
+    }
+
+    /** Get values for the last full frame. */
+    def histogram(id: Int): Seq[DataRecord] = {
+        var last = Seq[DataRecord]()
+        var current = Seq[DataRecord]()
+        var frame = -1
+        for (d <- values(id)) {
+            if (d.id != frame) {
+                last = current
+                current = Seq[DataRecord]()
+                frame = d.id
+            }
+            current = current :+ d
+        }
+        return (if (last.isEmpty) current else last)
     }
 
     def register(l: TraceListener) {
@@ -55,8 +75,13 @@ class TraceReader(val file: File) {
     }
 
     def process {
-        for (l <- traceListeners) {
-            l.updateTrace
+        val now = System.currentTimeMillis
+        if (now - lastUpdate >= interval) {
+            readRecords
+            for (l <- traceListeners) {
+                l.updateTrace
+            }
+            lastUpdate = System.currentTimeMillis
         }
     }
 

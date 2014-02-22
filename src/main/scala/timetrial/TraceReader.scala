@@ -31,8 +31,8 @@ class TraceReader(val file: File) {
             } else if (fields.length == 5 && fields(0) == "d") {
                 val id = fields(1).toInt
                 val frame = fields(2).toInt
-                val index = fields(3).toInt
-                val value = fields(4).toInt
+                val index = fields(3).toLong
+                val value = fields(4).toLong
                 DataRecord(id, frame, index, value)
             } else {
                 InvalidRecord(line)

@@ -15,5 +15,5 @@ case class StartRecord(val id: Int,
 
 case class DataRecord(val id: Int,
                       val frame: Int,
-                      val index: Int,
-                      val value: Int) extends Record
+                      val index: Long,
+                      val value: Long) extends Record

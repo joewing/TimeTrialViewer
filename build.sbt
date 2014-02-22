@@ -1,6 +1,4 @@
-scalaVersion := "2.10.1"
-
-scalaOrganization := "org.scala-lang.virtualized"
+scalaVersion := "2.10.3"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
@@ -10,4 +8,4 @@ artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
    "scalapipe." + artifact.extension
 }
 
-libraryDependencies += "org.scala-lang" % "scala-swing" % "2.10.1"
+libraryDependencies += "org.scala-lang" % "scala-swing" % "2.10.3"

@@ -30,23 +30,30 @@ class GraphPanel(val trace: TraceReader)
         }
     }
 
-    private def drawAxes(g: Graphics2D) {
-        g.setColor(hl)
+    private def drawXAxis(g: Graphics2D) {
         g.drawLine(left, size.height - bottom,
                    size.width, size.height - bottom)
+        val layout = new TextLayout("Frame", font, g.getFontRenderContext)
+        val x = size.width / 2 - layout.getBounds.getWidth / 2
+        val y = size.height - font.getSize
+        layout.draw(g, x.toFloat, y.toFloat)
+    }
+
+    private def drawYAxis(g: Graphics2D) {
         g.drawLine(left, 0, left, size.height - bottom)
-
-        val xlayout = new TextLayout("Frame", font, g.getFontRenderContext)
-        val fx = size.width / 2 - xlayout.getBounds.getWidth / 2
-        val fy = size.height - font.getSize
-        xlayout.draw(g, fx.toFloat, fy.toFloat)
-
         val label = tap.head.label
-        val ylayout = new TextLayout(label, font, g.getFontRenderContext)
-        g.translate(font.getSize,
-                    size.height / 2 - ylayout.getBounds.getWidth / 2)
+        val layout = new TextLayout(label, font, g.getFontRenderContext)
+        val x = font.getSize
+        val y = size.height / 2
+        g.translate(x, y)
         g.rotate(-math.Pi / 2.0)
-        ylayout.draw(g, 0, 0)
+        layout.draw(g, (-layout.getBounds.getWidth / 2.0).toFloat, 0)
+    }
+
+    private def drawAxes(g: Graphics2D) {
+        g.setColor(hl)
+        drawXAxis(g)
+        drawYAxis(g)
     }
 
     private def showHistogram(g: Graphics2D) {

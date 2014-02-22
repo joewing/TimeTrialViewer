@@ -29,6 +29,13 @@ class TapSelector(
         if (taps.length != model.getSize) {
             model.removeAllElements
             taps.foreach { t => model.addElement(t) }
+        } else {
+            taps.zipWithIndex.foreach { case (t, i) =>
+                if (model.getElementAt(i) != t) {
+                    model.removeElementAt(i)
+                    model.insertElementAt(t, i)
+                }
+            }
         }
     }
 

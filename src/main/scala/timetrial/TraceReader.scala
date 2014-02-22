@@ -60,14 +60,18 @@ class TraceReader(val file: File, val interval: Int = 1000) {
         var current = Seq[DataRecord]()
         var frame = -1
         for (d <- values(id)) {
-            if (d.id != frame) {
+            if (d.frame != frame) {
                 last = current
                 current = Seq[DataRecord]()
-                frame = d.id
+                frame = d.frame
             }
             current = current :+ d
         }
-        return (if (last.isEmpty) current else last)
+        if (last.isEmpty) {
+            return current
+        } else {
+            return last
+        }
     }
 
     def register(l: TraceListener) {

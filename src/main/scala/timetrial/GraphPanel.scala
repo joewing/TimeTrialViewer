@@ -12,9 +12,18 @@ class GraphPanel(val trace: TraceReader)
     private lazy val left = font.getSize * 2
     private lazy val bottom = font.getSize * 2
 
-    var tap: Option[StartRecord] = trace.taps.headOption
+    private var tap: Option[StartRecord] = trace.taps.headOption
+    private var data: Seq[DataRecord] = Seq()
 
     preferredSize = new Dimension(640, 480)
+
+    def setTap(t: StartRecord) {
+        tap = Some(t)
+        t.stat match {
+            case "hist" => data = trace.histogram(t.id)
+            case _      => data = trace.values(t.id)
+        }
+    }
 
     override def paintComponent(g: Graphics2D) {
         super.paintComponent(g)
@@ -57,8 +66,6 @@ class GraphPanel(val trace: TraceReader)
     }
 
     private def showHistogram(g: Graphics2D) {
-        val id = tap.head.id
-        val data = trace.histogram(id).map(_.value)
         val len = data.length
         if (len == 0) {
             return
@@ -68,15 +75,14 @@ class GraphPanel(val trace: TraceReader)
     }
 
     private def showTrace(g: Graphics2D) {
-        val id = tap.head.id
-        val data = trace.values(id).map(_.value).toSeq
         val len = data.length
         if (len == 0) {
             return
         }
 
-        val maxValue = data.max
-        val minValue = data.min
+        val values = data.map(_.value)
+        val maxValue = values.max
+        val minValue = values.min
         val diff = math.max(1, maxValue - minValue)
         val yscale = (size.height - left).toDouble / diff.toDouble
         val xscale = (size.width - bottom).toDouble / len.toDouble
@@ -86,7 +92,7 @@ class GraphPanel(val trace: TraceReader)
         val ypoints = new Array[Int](npoints)
         for (i <- 0 until len) {
             xpoints(i) = (i * xscale).toInt + left
-            ypoints(i) = (data(i) * yscale).toInt
+            ypoints(i) = (values(i) * yscale).toInt
         }
         xpoints(len) = size.width
         ypoints(len) = size.height - bottom
@@ -98,6 +104,9 @@ class GraphPanel(val trace: TraceReader)
         drawAxes(g)
     }
 
-    def updateTrace = repaint
+    def updateTrace = {
+        tap.foreach(setTap)
+        repaint
+    }
 
 }

@@ -19,7 +19,7 @@ class TapSelector(
     def actionPerformed(e: ActionEvent) {
         val selection = model.getSelectedItem.asInstanceOf[StartRecord]
         if (selection != null) {
-            graph.tap = Some(selection)
+            graph.setTap(selection)
             graph.repaint
         }
     }

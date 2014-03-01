@@ -109,10 +109,8 @@ class GraphPanel(val trace: TraceReader)
         }
 
         val values = data.map(_.value)
-        val maxValue = values.max
-        val minValue = values.min
-        val diff = math.max(1, maxValue - minValue)
-        val yscale = (size.height - bottom).toDouble / diff.toDouble
+        val maxValue = math.max(100, values.max)
+        val yscale = (size.height - bottom).toDouble / maxValue.toDouble
         val xscale = (size.width - left).toDouble / len.toDouble
 
         val npoints = len + 2
@@ -120,7 +118,7 @@ class GraphPanel(val trace: TraceReader)
         val ypoints = new Array[Int](npoints)
         for (i <- 0 until len) {
             xpoints(i) = (i * xscale).toInt + left
-            ypoints(i) = (values(i) * yscale).toInt
+            ypoints(i) = ((maxValue - values(i)) * yscale).toInt
         }
         xpoints(len) = xpoints(len - 1)
         ypoints(len) = size.height - bottom
